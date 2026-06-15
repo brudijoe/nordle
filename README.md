@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Welcome to your Expo app 👋
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
@@ -58,4 +57,3 @@ Join our community of developers creating universal apps.
 =======
 # nordle
 This a worlde game with react-native
->>>>>>> fb95ed34927cf4e84ad327e22f174db254a5abcb
