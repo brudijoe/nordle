@@ -22,7 +22,7 @@ type GameStore = {
 
     currentWord: Word;
     addLetterToWord: (index: number, letter: string | undefined) => void;
-    resetWord: () => void;
+    deleteWord: () => void;
 };
 
 const initialWord: Word = {
@@ -38,11 +38,13 @@ const initialWord: Word = {
     isWordComplete: false,
 };
 
+const initialLetter: Letter = {
+    index: 0, value: '', isActive: true
+}
+
 const useGameStore = create<GameStore>((set) => ({
     // TODO Hier das currentLetter Object holen
-    currentLetter: {
-        index: 0, value: '', isActive: true
-    },
+    currentLetter: initialLetter,
     activateLetter: (index, letter, isActive) => set((state) => {
         const nextLetters = state.currentWord.letters.map((item, currentIndex) =>
             currentIndex === index ? { ...item, value: state.currentWord.letters[index].value, isActive }
@@ -181,7 +183,7 @@ const useGameStore = create<GameStore>((set) => ({
             },
         };
     }),
-    resetWord: () => set({ currentWord: initialWord }),
+    deleteWord: () => set({ currentWord: initialWord, currentLetter: initialLetter }),
 }));
 
 export default useGameStore;

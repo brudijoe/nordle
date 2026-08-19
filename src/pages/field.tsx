@@ -12,20 +12,14 @@ export default function Field({ }: FieldProps) {
     const keyboardLetters = ["Q", "W", "E", "R", "T", "Z", "U", "I", "O", "P", "A", "S",
         "D", "F", "G", "H", "J", "K", "L", "Y", "X", "C", "V", "B", "N", "M"];
 
-
     const state = useGameStore();
-    console.log(state);
-
     const moveOneLetterBack = useGameStore((state) => state.moveOneLetterBack);
-
+    const deleteWord = useGameStore((state) => state.deleteWord);
 
     // TODO
     // x. ZURÜCK UND BESTÄTIGEN KNÖPFE
     // 1. Wort eingeben z. B: R A S E N
     // x. Wort prüfen
-
-    console.log("state.currentLetter.index: ", state.currentLetter.index);
-
 
     return (
         <View style={styles.container}>
@@ -49,7 +43,9 @@ export default function Field({ }: FieldProps) {
                     <Text style={styles.buttonText}>Zurück</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.button}>
-                    <Text style={styles.buttonText}>Wort löschen</Text>
+                    <Text style={styles.buttonText}
+                        onPress={deleteWord}>
+                        Wort löschen</Text>
                 </TouchableOpacity>
             </View>
         </View>
