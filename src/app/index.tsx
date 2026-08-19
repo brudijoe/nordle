@@ -1,9 +1,10 @@
-import { Text, View, StyleSheet } from "react-native";
+import Field from "@/pages/field";
+import { View, StyleSheet } from "react-native";
 
 export default function Index() {
   return (
     <View style={styles.container}>
-      <Text>Nordle</Text>
+      <Field />
     </View>
   );
 }
@@ -13,5 +14,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: 'black',
   },
 });
