@@ -1,13 +1,7 @@
-import useGameStore from "@/store/useGameStore";
-import { StyleSheet, Text, TouchableOpacity } from "react-native";
+import useGameStore, { Letter as LetterProps } from "@/store/useGameStore";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-type LetterProps = {
-    index: number,
-    value?: string;
-    isActive: boolean;
-};
-
-export default function Letter({ index, value, isActive }: LetterProps) {
+export default function Letter({ index, value, isActive, status }: LetterProps) {
 
     // TODO
     // Beim Drücken auf einen Letter sollte dieser aktiviert werden
@@ -22,6 +16,8 @@ export default function Letter({ index, value, isActive }: LetterProps) {
             borderColor: isActive ? 'red' : 'white',
             borderWidth: 2,
             borderRadius: 5,
+            // TODO typing
+            backgroundColor: status === 'unchecked' ? 'transparent' : status === 'match' ? 'green' : status === 'noMatch' ? 'gray' : status === 'matchInOtherPlace' && 'yellow',
         },
         text: {
             color: 'white',
@@ -29,16 +25,14 @@ export default function Letter({ index, value, isActive }: LetterProps) {
     });
 
     return (
-        <TouchableOpacity style={dynamicStyles.container}
-            onPress={() => {
-                // TODO
-                // Neuer Current Letter setzen
-                // Kann hier ja nicht mit 0 Arbeiten
-                activateLetter(index, value, true);
-
-            }}>
-            <Text style={dynamicStyles.text}>{value}</Text>
-        </TouchableOpacity>
+        <View>
+            <TouchableOpacity style={dynamicStyles.container}
+                onPress={() => {
+                    activateLetter(index, value, true);
+                }}>
+                <Text style={dynamicStyles.text}>{value}</Text>
+            </TouchableOpacity>
+        </View>
     );
 }
 
