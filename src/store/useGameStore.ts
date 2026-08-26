@@ -1,10 +1,13 @@
 // Created: 2026-08-13
 import { create } from 'zustand';
 
-type Letter = {
+export type LetterStatus = 'unchecked' | 'match' | 'noMatch' | 'matchInOtherPlace';
+
+export type Letter = {
     index: number,
     value: string;
     isActive: boolean;
+    status: LetterStatus;
 };
 
 type Word = {
@@ -15,26 +18,29 @@ type Word = {
 };
 
 type GameStore = {
+    // Letter
     currentLetter: Letter;
     activateLetter: (index: number, letter: Letter, isActive: boolean) => void;
 
+    // Word
     moveOneLetterBack: (index: number) => void;
-
     currentWord: Word;
     addLetterToWord: (index: number, letter: string | undefined) => void;
+    checkWord: () => void;
     deleteWord: () => void;
 };
 
 const initialWord: Word = {
     letters: [
-        { index: 0, value: '', isActive: true },
-        { index: 1, value: '', isActive: false },
-        { index: 2, value: '', isActive: false },
-        { index: 3, value: '', isActive: false },
-        { index: 4, value: '', isActive: false },
+        { index: 0, value: '', isActive: true, status: 'unchecked' },
+        { index: 1, value: '', isActive: false, status: 'unchecked' },
+        { index: 2, value: '', isActive: false, status: 'unchecked' },
+        { index: 3, value: '', isActive: false, status: 'unchecked' },
+        { index: 4, value: '', isActive: false, status: 'unchecked' },
     ],
     currentWord: '',
     wordLength: 5,
+    completeWord: '',
     isWordComplete: false,
 };
 
@@ -43,19 +49,75 @@ const initialLetter: Letter = {
 }
 
 const useGameStore = create<GameStore>((set) => ({
-    // TODO Hier das currentLetter Object holen
+
+    // TODO später im Fake-Backend/Backend prüfen
+    answerWord: [
+        { index: 0, value: 'W', isActive: false },
+        { index: 1, value: 'E', isActive: false },
+        { index: 2, value: 'R', isActive: false },
+        { index: 3, value: 'T', isActive: false },
+        { index: 4, value: 'E', isActive: false },
+    ],
+
+    checkWord: () => set((state) => {
+        const answerWord = ['W', 'E', 'R', 'T', 'E']; // kommt später vom Backend
+
+        // Buchstabenanzahl vom Lösungswort
+        // z. B. WERTE {"letterRecord": {"E": 2, "R": 1, "T": 1, "W": 1}}
+        const letterRecord: Record<string, number> = answerWord.reduce((acc, char) => {
+            acc[char] = (acc[char] || 0) + 1;
+            return acc;
+        }, {} as Record<string, number>);
+
+        const letterGuess = state.currentWord.letters;
+
+        // Beim einem Match wird die Buchstabenanzahl reduziert um 1
+        // z. B. E E E W W {"letterStatuses": ["", "match", "", "", ""]}
+        const letterStatuses: (Letter['status'])[] = letterGuess.map((item, index) => {
+            if (item.value === answerWord[index]) {
+                // Bei einem Match, wird der Zähler um 1 für z. B. "E": 2 um 1 reduziert
+                letterRecord[item.value] = letterRecord[item.value] - 1;
+                return 'match';
+            }
+            return "";
+        });
+
+        console.log({ letterStatuses });
+
+        // Überprüft alles was kein 'match' ist und reduziert den Zähler um 1
+        // z. B. E E E W W {"finalStatuses": ["matchInOtherPlace", "match", "noMatch", "matchInOtherPlace", "noMatch"]}
+        const finalStatuses = letterStatuses.map((status, index) => {
+            if (status === 'match') return 'match';
+
+            // Einzelbuchstaben z. B. E, E, E, W, W
+            const letter = letterGuess[index].value;
+            if (letterRecord[letter] > 0) {
+                letterRecord[letter] = letterRecord[letter] - 1;
+                return 'matchInOtherPlace';
+            }
+            return 'noMatch';
+        });
+
+        const nextLetters = letterGuess.map((item, index) => ({
+            ...item,
+            status: finalStatuses[index],
+            isActive: false,
+        }));
+
+        return {
+            currentWord: {
+                ...state.currentWord,
+                letters: nextLetters,
+            },
+        };
+    }),
+
     currentLetter: initialLetter,
     activateLetter: (index, letter, isActive) => set((state) => {
         const nextLetters = state.currentWord.letters.map((item, currentIndex) =>
             currentIndex === index ? { ...item, value: state.currentWord.letters[index].value, isActive }
                 : { ...item, isActive: false },
         );
-
-        console.log(nextLetters);
-
-
-        // TODO
-        // Rest muss ja isActive: false haben
 
         const allValuesSet = nextLetters.every(item => item.value !== "");
 
@@ -139,12 +201,9 @@ const useGameStore = create<GameStore>((set) => ({
 
     addLetterToWord: (index, letter) => set((state) => {
 
-        // TODO das müsste ich ja generell haben?
         const nextActiveIndex = index < state.currentWord.wordLength - 1
             ? index + 1
             : index;
-
-        console.log(state.currentWord.letters);
 
         const nextLetters = state.currentWord.letters.map((item, currentIndex) => {
             // Last Letter in Word
