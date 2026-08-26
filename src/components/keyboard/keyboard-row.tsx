@@ -14,7 +14,7 @@ export default function KeyboardRow({ }: KeyboardRowProps) {
             <KeyboardLetter value='E' />
             <KeyboardLetter value='R' />
             <KeyboardLetter value='T' />
-            <KeyboardLetter />
+            <KeyboardLetter value='Z' />
             <KeyboardLetter />
             <KeyboardLetter />
             <KeyboardLetter />

@@ -17,18 +17,9 @@ export default function KeyboardLetter({ value }: KeyboardLetterProps) {
     const isWordComplete = useGameStore((state) => state.currentWord.isWordComplete);
     const wordIsNotComplete = !isWordComplete;
 
-    // TODO Neuen active index holen
-
-    console.log("state.currentLetter.index: ", state.currentWord.letters);
-
-    console.log("state.currentLetter: ", state.currentLetter);
-
     return (
         <TouchableOpacity
             onPress={() => {
-                // Kann hier ja nicht mit 0 Arbeiten
-                // 0
-
                 if (state.currentLetter.isActive === true && state.currentLetter.index <= 4) {
                     {
                         if (wordIsNotComplete === true) {
@@ -37,7 +28,6 @@ export default function KeyboardLetter({ value }: KeyboardLetterProps) {
                     }
 
                 }
-
             }}
             style={styles.container}
         >
