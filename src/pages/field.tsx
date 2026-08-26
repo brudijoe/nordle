@@ -15,6 +15,7 @@ export default function Field({ }: FieldProps) {
     const state = useGameStore();
     const moveOneLetterBack = useGameStore((state) => state.moveOneLetterBack);
     const deleteWord = useGameStore((state) => state.deleteWord);
+    const checkWord = useGameStore((state) => state.checkWord)
 
     // TODO
     // x. ZURÜCK UND BESTÄTIGEN KNÖPFE
@@ -31,8 +32,9 @@ export default function Field({ }: FieldProps) {
                 <KeyboardRow />
             </View>
             <View style={styles.buttonContainer}>
-                <TouchableOpacity style={styles.button}>
-                    <Text style={styles.buttonText}>Wort prüfen</Text>
+                <TouchableOpacity style={styles.button} onPress={checkWord}>
+                    <Text style={styles.buttonText}>
+                        Wort prüfen</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.button}
                     onPress={() => {
