@@ -7,12 +7,15 @@ export default function Word() {
 
     return (
         <View style={styles.container}>
-            {/* Map Letter */}
-            <Letter index={state.currentWord.letters[0].index} value={state.currentWord.letters[0].value} isActive={state.currentWord.letters[0].isActive} />
-            <Letter index={state.currentWord.letters[1].index} value={state.currentWord.letters[1].value} isActive={state.currentWord.letters[1].isActive} />
-            <Letter index={state.currentWord.letters[2].index} value={state.currentWord.letters[2].value} isActive={state.currentWord.letters[2].isActive} />
-            <Letter index={state.currentWord.letters[3].index} value={state.currentWord.letters[3].value} isActive={state.currentWord.letters[3].isActive} />
-            <Letter index={state.currentWord.letters[4].index} value={state.currentWord.letters[4].value} isActive={state.currentWord.letters[4].isActive} />
+            {state.currentWord.letters.map((letter, indexLetter) => {
+                return <Letter
+                    key={indexLetter}
+                    index={letter.index}
+                    value={letter.value}
+                    isActive={letter.isActive}
+                    status={letter.status}
+                />
+            })}
         </View>
     );
 }
