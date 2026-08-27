@@ -10,11 +10,14 @@ export type Letter = {
     status: LetterStatus;
 };
 
+type WordStatus = 'unfinished' | 'completed';
+
 type Word = {
     letters: Letter[];
     currentWord: string;
     wordLength: number;
     isWordComplete: boolean;
+    status: WordStatus;
 };
 
 type GameStore = {
@@ -45,7 +48,10 @@ const initialWord: Word = {
 };
 
 const initialLetter: Letter = {
-    index: 0, value: '', isActive: true
+    index: 0,
+    value: '',
+    isActive: true,
+    status: 'unchecked',
 }
 
 const useGameStore = create<GameStore>((set) => ({
@@ -81,8 +87,6 @@ const useGameStore = create<GameStore>((set) => ({
             }
             return "";
         });
-
-        console.log({ letterStatuses });
 
         // Überprüft alles was kein 'match' ist und reduziert den Zähler um 1
         // z. B. E E E W W {"finalStatuses": ["matchInOtherPlace", "match", "noMatch", "matchInOtherPlace", "noMatch"]}
@@ -123,13 +127,13 @@ const useGameStore = create<GameStore>((set) => ({
 
         return {
             currentLetter: {
+                ...state.currentLetter,
                 index,
                 letter,
                 isActive
             },
             currentWord: {
                 ...state.currentWord,
-
                 letters: nextLetters,
                 isWordComplete: allValuesSet,
             },
@@ -229,6 +233,7 @@ const useGameStore = create<GameStore>((set) => ({
 
         return {
             currentLetter: {
+                ...state.currentLetter,
                 // TODO wordlength checken
                 index: index == 4 ? index : index + 1,
                 letter,
