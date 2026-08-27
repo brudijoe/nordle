@@ -3,6 +3,7 @@ import Word from '@/components/word';
 import KeyboardRow from '@/components/keyboard/keyboard-row';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import useGameStore from '@/store/useGameStore';
+import { useSnackbarStore } from '@/store/snackbarStore';
 
 type FieldProps = {
     // Define props here
@@ -22,6 +23,9 @@ export default function Field({ }: FieldProps) {
     // 1. Wort eingeben z. B: R A S E N
     // x. Wort prüfen
 
+    //Snackbar
+    const show = useSnackbarStore((state) => state.show);
+
     return (
         <View style={styles.container}>
             <View style={styles.wordContainer}>
@@ -32,14 +36,29 @@ export default function Field({ }: FieldProps) {
                 <KeyboardRow />
             </View>
             <View style={styles.buttonContainer}>
-                <TouchableOpacity style={styles.button} onPress={checkWord}>
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => {
+                        if (state.currentWord.isWordComplete) {
+                            checkWord();
+                        }
+                        // uncomplete word
+                        if (!state.currentWord.isWordComplete) {
+                            show('Vervollständige das Wort');
+                        }
+                    }}>
                     <Text style={styles.buttonText}>
                         Wort prüfen</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.button}
                     onPress={() => {
                         if (state.currentLetter.index >= 1 && state.currentLetter.index <= 4) {
-                            moveOneLetterBack(state.currentLetter.index);
+                            if (!state.currentWord.isWordComplete) {
+                                moveOneLetterBack(state.currentLetter.index);
+                            }
+                            if (state.currentWord.isWordComplete) {
+                                show('Das Wort wurde bereits geprüft.');
+                            }
                         }
                     }}>
                     <Text style={styles.buttonText}>Zurück</Text>

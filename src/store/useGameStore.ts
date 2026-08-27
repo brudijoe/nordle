@@ -15,7 +15,6 @@ type WordStatus = 'unfinished' | 'completed';
 type Word = {
     letters: Letter[];
     currentWord: string;
-    wordLength: number;
     isWordComplete: boolean;
     status: WordStatus;
 };
@@ -42,8 +41,7 @@ const initialWord: Word = {
         { index: 4, value: '', isActive: false, status: 'unchecked' },
     ],
     currentWord: '',
-    wordLength: 5,
-    completeWord: '',
+    status: 'unfinished',
     isWordComplete: false,
 };
 
@@ -205,7 +203,8 @@ const useGameStore = create<GameStore>((set) => ({
 
     addLetterToWord: (index, letter) => set((state) => {
 
-        const nextActiveIndex = index < state.currentWord.wordLength - 1
+        // TODO const for wordLength index < 4
+        const nextActiveIndex = index < 4
             ? index + 1
             : index;
 
