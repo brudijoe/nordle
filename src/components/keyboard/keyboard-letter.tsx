@@ -7,19 +7,23 @@ type KeyboardLetterProps = {
     value?: string;
 }
 
-// TODO
-// CurrentSelectedLetter einbauen
-// Welcher Letter ist gerade active
-
 export default function KeyboardLetter({ value }: KeyboardLetterProps) {
     const addLetterToWord = useGameStore((state) => state.addLetterToWord);
+    // TODO aktuellen Attempt holen
+    const currentAttempt = useGameStore((state) => state.currentGame.attempts[state.currentGame.currentAttempt]);
     const state = useGameStore();
     const isWordComplete = useGameStore((state) => state.currentWord.isWordComplete);
     const wordIsNotComplete = !isWordComplete;
 
+    console.log({ currentAttempt });
+
+
     return (
         <TouchableOpacity
             onPress={() => {
+                // TODO ändern auf den Current attempt
+                addLetterToWord(currentAttempt.word.letters[state.currentGame.currentAttempt].index, value)
+
                 if (state.currentLetter.isActive === true && state.currentLetter.index <= 4) {
                     {
                         if (wordIsNotComplete === true) {

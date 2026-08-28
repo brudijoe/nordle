@@ -26,10 +26,18 @@ export default function Field({ }: FieldProps) {
     //Snackbar
     const show = useSnackbarStore((state) => state.show);
 
+    const game = useGameStore((state) => state.currentGame);
+
     return (
         <View style={styles.container}>
             <View style={styles.wordContainer}>
-                <Word />
+                {/* Müsste hier die Attempts mappen? */}
+                {game.attempts.map((attempt, index) => {
+                    return <Word
+                        key={index}
+                        attempt={attempt}
+                    />
+                })}
             </View>
 
             <View style={styles.keyboardContainer}>
@@ -79,7 +87,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     wordContainer: {
-        flexDirection: 'row',
+        flexDirection: 'column',
         justifyContent: 'center',
         gap: '2px',
         marginBottom: 2,
