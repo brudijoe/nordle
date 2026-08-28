@@ -19,6 +19,18 @@ type Word = {
     status: WordStatus;
 };
 
+type Attempt = {
+    index: number,
+    isCurrentAttempt: boolean,
+    word: Word,
+}
+
+type Game = {
+    currentAttempt: number,
+    isGameFinished: boolean,
+    attempts: Attempt[],
+};
+
 type GameStore = {
     // Letter
     currentLetter: Letter;
@@ -30,6 +42,9 @@ type GameStore = {
     addLetterToWord: (index: number, letter: string | undefined) => void;
     checkWord: () => void;
     deleteWord: () => void;
+
+    // Game
+    currentGame: Game;
 };
 
 const initialWord: Word = {
@@ -52,7 +67,22 @@ const initialLetter: Letter = {
     status: 'unchecked',
 }
 
+const initialGame: Game = {
+    currentAttempt: 0,
+    isGameFinished: false,
+    attempts: [
+        { index: 0, isCurrentAttempt: true, word: initialWord },
+        { index: 1, isCurrentAttempt: false, word: initialWord },
+        { index: 2, isCurrentAttempt: false, word: initialWord },
+        { index: 3, isCurrentAttempt: false, word: initialWord },
+        { index: 4, isCurrentAttempt: false, word: initialWord },
+        { index: 3, isCurrentAttempt: false, word: initialWord },
+    ],
+}
+
 const useGameStore = create<GameStore>((set) => ({
+
+    currentGame: initialGame,
 
     // TODO später im Fake-Backend/Backend prüfen
     answerWord: [
