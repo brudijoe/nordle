@@ -1,8 +1,7 @@
 import useGameStore, { Letter as LetterProps } from "@/store/useGameStore";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-export default function Letter(props: LetterProps) {
-    const { index, value, isActive, status } = props;
+export default function Letter({ index, value, isActive, status }: LetterProps) {
     const activateLetter = useGameStore((state) => state.activateLetter);
 
     const dynamicStyles = StyleSheet.create({

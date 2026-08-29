@@ -1,20 +1,14 @@
 import { StyleSheet, View } from "react-native";
 import Letter from "./letter";
-import useGameStore, { Game as GameProps } from "@/store/useGameStore";
+import useGameStore, { Attempt as AttemptProps } from "@/store/useGameStore";
 
-export default function Word({ attempt }) {
-    const state = useGameStore();
-
-    // Wenn das game nicht finished ist, dann kann der Benutzer einen weiteren Attempt machen
-
-    console.log(attempt);
-
+export default function Word({ index, isCurrentAttempt, word }: AttemptProps) {
     return (
         <View style={styles.container}>
             {/* Das gehört am Anfang zum ersten Versuch */}
             {/* Attempt müssten die letters enthalten, das hier ist sonst unlogisch */}
-            {attempt.word.letters.map((letter, indexLetter) => {
-                if (attempt.currentAttempt === true) {
+            {word.letters.map((letter, indexLetter) => {
+                if (isCurrentAttempt === true) {
                     return <Letter
                         key={indexLetter}
                         index={letter.index}
@@ -24,7 +18,7 @@ export default function Word({ attempt }) {
                     />
                 } else {
                     return (
-                        <View>
+                        <View key={indexLetter}>
                             <View style={styles.emptyLetter} />
                         </View>
                     );

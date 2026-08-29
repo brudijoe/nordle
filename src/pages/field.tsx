@@ -17,6 +17,7 @@ export default function Field({ }: FieldProps) {
     const moveOneLetterBack = useGameStore((state) => state.moveOneLetterBack);
     const deleteWord = useGameStore((state) => state.deleteWord);
     const checkWord = useGameStore((state) => state.checkWord)
+    const currentAttempt = useGameStore((state) => state.currentGame.attempts[state.currentGame.currentAttempt]);
 
     // TODO
     // x. ZURÜCK UND BESTÄTIGEN KNÖPFE
@@ -35,7 +36,9 @@ export default function Field({ }: FieldProps) {
                 {game.attempts.map((attempt, index) => {
                     return <Word
                         key={index}
-                        attempt={attempt}
+                        index={attempt.index}
+                        isCurrentAttempt={attempt.isCurrentAttempt}
+                        word={attempt.word}
                     />
                 })}
             </View>
@@ -47,13 +50,15 @@ export default function Field({ }: FieldProps) {
                 <TouchableOpacity
                     style={styles.button}
                     onPress={() => {
-                        if (state.currentWord.isWordComplete) {
-                            checkWord();
-                        }
-                        // uncomplete word
-                        if (!state.currentWord.isWordComplete) {
-                            show('Vervollständige das Wort');
-                        }
+                        // TODO
+                        checkWord(currentAttempt.word.letters);
+                        // if (state.currentWord.isWordComplete) {
+                        //     checkWord(currentAttempt.word.letters);
+                        // }
+                        // // uncomplete word
+                        // if (!state.currentWord.isWordComplete) {
+                        //     show('Vervollständige das Wort');
+                        // }
                     }}>
                     <Text style={styles.buttonText}>
                         Wort prüfen</Text>

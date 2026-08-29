@@ -19,7 +19,7 @@ type Word = {
     status: WordStatus;
 };
 
-type Attempt = {
+export type Attempt = {
     index: number,
     isCurrentAttempt: boolean,
     word: Word,
@@ -40,11 +40,12 @@ type GameStore = {
     moveOneLetterBack: (index: number) => void;
     currentWord: Word;
     addLetterToWord: (index: number, letter: string | undefined) => void;
-    checkWord: () => void;
+    checkWord: (guessedWord: Letter[]) => void;
     deleteWord: () => void;
 
     // Game
     currentGame: Game;
+    addLetterToCurrentAttempt: (attempt: Attempt, letterIndex: number, letter: string | undefined) => void;
 };
 
 const initialWord: Word = {
@@ -93,7 +94,7 @@ const useGameStore = create<GameStore>((set) => ({
         { index: 4, value: 'E', isActive: false },
     ],
 
-    checkWord: () => set((state) => {
+    checkWord: (guessedWord) => set((state) => {
         const answerWord = ['W', 'E', 'R', 'T', 'E']; // kommt später vom Backend
 
         // Buchstabenanzahl vom Lösungswort
@@ -103,7 +104,7 @@ const useGameStore = create<GameStore>((set) => ({
             return acc;
         }, {} as Record<string, number>);
 
-        const letterGuess = state.currentWord.letters;
+        const letterGuess = guessedWord;
 
         // Beim einem Match wird die Buchstabenanzahl reduziert um 1
         // z. B. E E E W W {"letterStatuses": ["", "match", "", "", ""]}
@@ -136,7 +137,12 @@ const useGameStore = create<GameStore>((set) => ({
             isActive: false,
         }));
 
+        // HIER NOCH DEN ATTEMPT UPDATEN
+        console.log("nextLetters: ", nextLetters);
+
+
         return {
+            // Hier updaten
             currentWord: {
                 ...state.currentWord,
                 letters: nextLetters,
@@ -277,6 +283,63 @@ const useGameStore = create<GameStore>((set) => ({
         };
     }),
     deleteWord: () => set({ currentWord: initialWord, currentLetter: initialLetter }),
+
+    addLetterToCurrentAttempt: (attempt, letterIndex, letter) => set((state) => {
+
+        // TODO const for wordLength index < 4
+        const nextActiveIndex = letterIndex < 4
+            ? letterIndex + 1
+            : letterIndex;
+
+        const nextAttempts = state.currentGame.attempts.map((currentAttempt, currentIndex) => {
+            // Andere Attempts unverändert zurückgeben
+            if (attempt.index !== currentIndex) {
+                return currentAttempt;
+            }
+
+            const nextLetters = currentAttempt.word.letters.map((item, currentIndex) => {
+                // Last Letter in Word
+                if (currentIndex === 4 && letterIndex === 4) {
+                    return { ...item, value: letter ?? '', isActive: false };
+                }
+
+                // Last Typed Letter
+                if (currentIndex === letterIndex) {
+                    return { ...item, value: letter ?? '', isActive: false };
+                }
+
+                return {
+                    ...item,
+                    isActive: currentIndex === nextActiveIndex,
+                };
+            });
+
+            console.log(nextLetters);
+
+
+            return {
+                ...currentAttempt,
+                word: {
+                    ...currentAttempt.word,
+                    letters: nextLetters,
+                },
+            };
+        });
+
+        return {
+            currentLetter: {
+                ...state.currentLetter,
+                // TODO wordlength checken
+                index: letterIndex == 4 ? letterIndex : letterIndex + 1,
+                letter,
+                isActive: true
+            },
+            currentGame: {
+                ...state.currentGame,
+                attempts: nextAttempts,
+            },
+        };
+    }),
 }));
 
 export default useGameStore;
