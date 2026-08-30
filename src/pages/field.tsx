@@ -20,7 +20,7 @@ export default function Field({ }: FieldProps) {
     const currentAttempt = useGameStore((state) => state.currentGame.attempts[state.currentGame.currentAttempt]);
     const activeWord = currentAttempt.word;
 
-    console.log(activeWord.isWordComplete);
+    console.log(activeWord.isWordChecked);
 
 
     // TODO
@@ -32,9 +32,6 @@ export default function Field({ }: FieldProps) {
     const show = useSnackbarStore((state) => state.show);
 
     const game = useGameStore((state) => state.currentGame);
-
-    console.log("currentGame: ", game.attempts[0].word.letters);
-
 
     return (
         <View style={styles.container}>
@@ -56,16 +53,16 @@ export default function Field({ }: FieldProps) {
                 <TouchableOpacity
                     style={styles.button}
                     onPress={() => {
-                        // if (!activeWord.isWordComplete) {
+                        // if (!activeWord.isWordChecked) {
                         //     show('Vervollständige das Wort');
                         //     return;
                         // }
 
-                        // if (state.currentWord.isWordComplete) {
+                        // if (state.currentWord.isWordChecked) {
                         //     checkWord(currentAttempt.word.letters);
                         // }
                         // // uncomplete word
-                        // if (!state.currentWord.isWordComplete) {
+                        // if (!state.currentWord.isWordChecked) {
                         //     show('Vervollständige das Wort');
                         // }
 
@@ -77,12 +74,12 @@ export default function Field({ }: FieldProps) {
                 <TouchableOpacity style={styles.button}
                     onPress={() => {
                         if (state.currentLetter.index >= 1 && state.currentLetter.index <= 4) {
-                            if (!activeWord.isWordComplete) {
+                            if (!activeWord.isWordChecked) {
                                 moveOneLetterBack(state.currentLetter.index);
                                 return;
                             }
 
-                            if (activeWord.isWordComplete) {
+                            if (activeWord.isWordChecked) {
                                 show('Das Wort wurde bereits geprüft.');
                             }
                         }

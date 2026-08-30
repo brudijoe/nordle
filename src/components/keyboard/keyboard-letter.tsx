@@ -13,8 +13,8 @@ export default function KeyboardLetter({ value }: KeyboardLetterProps) {
     // TODO aktuellen Attempt holen
     const currentAttempt = useGameStore((state) => state.currentGame.attempts[state.currentGame.currentAttempt]);
     const state = useGameStore();
-    const isWordComplete = useGameStore((state) => state.currentWord.isWordComplete);
-    const wordIsNotComplete = !isWordComplete;
+    const isWordChecked = useGameStore((state) => state.currentWord.isWordChecked);
+    const wordIsNotComplete = !isWordChecked;
 
     return (
         <TouchableOpacity

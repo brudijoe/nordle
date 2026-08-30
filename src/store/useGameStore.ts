@@ -15,7 +15,7 @@ type WordStatus = 'unfinished' | 'completed';
 type Word = {
     letters: Letter[];
     currentWord: string;
-    isWordComplete: boolean;
+    isWordChecked: boolean;
     status: WordStatus;
 };
 
@@ -58,7 +58,7 @@ const initialWord: Word = {
     ],
     currentWord: '',
     status: 'unfinished',
-    isWordComplete: false,
+    isWordChecked: false,
 };
 
 const initialLetter: Letter = {
@@ -129,6 +129,7 @@ const useGameStore = create<GameStore>((set) => ({
         }));
 
         const currentAttemptIndex = state.currentGame.currentAttempt;
+
         const nextAttempts: Attempt[] = state.currentGame.attempts.map((attempt, index) => {
             if (index !== currentAttemptIndex) {
                 return attempt;
@@ -138,7 +139,7 @@ const useGameStore = create<GameStore>((set) => ({
                 ...attempt.word,
                 letters: nextLetters,
                 status: 'completed',
-                isWordComplete: true,
+                isWordChecked: true,
             };
 
             return {
@@ -148,11 +149,14 @@ const useGameStore = create<GameStore>((set) => ({
             };
         });
 
+        console.log("nextAttempts: ", nextAttempts[0].word.isWordChecked);
+
+
         const nextCurrentWord: Word = {
             ...state.currentWord,
             letters: nextLetters,
             status: 'completed',
-            isWordComplete: true,
+            isWordChecked: true,
         };
 
         return {
@@ -175,7 +179,7 @@ const useGameStore = create<GameStore>((set) => ({
         const allValuesSet = nextLetters.every(item => item.value !== "");
         const nextAttempts = state.currentGame.attempts.map((attempt, currentIndex) =>
             currentIndex === state.currentGame.currentAttempt
-                ? { ...attempt, word: { ...attempt.word, letters: nextLetters, isWordComplete: allValuesSet } }
+                ? { ...attempt, word: { ...attempt.word, letters: nextLetters, isWordChecked: allValuesSet } }
                 : attempt,
         );
 
@@ -189,7 +193,7 @@ const useGameStore = create<GameStore>((set) => ({
             currentWord: {
                 ...state.currentWord,
                 letters: nextLetters,
-                isWordComplete: allValuesSet,
+                isWordChecked: allValuesSet,
             },
             currentGame: {
                 ...state.currentGame,
@@ -222,7 +226,7 @@ const useGameStore = create<GameStore>((set) => ({
 
             const nextAttempts: Attempt[] = state.currentGame.attempts.map((attempt, currentIndex) =>
                 currentIndex === currentAttemptIndex
-                    ? { ...attempt, word: { ...attempt.word, letters: nextLetters, isWordComplete: false } }
+                    ? { ...attempt, word: { ...attempt.word, letters: nextLetters, isWordChecked: false } }
                     : attempt,
             );
 
@@ -234,7 +238,7 @@ const useGameStore = create<GameStore>((set) => ({
                 currentWord: {
                     ...state.currentWord,
                     letters: nextLetters,
-                    isWordComplete: false
+                    isWordChecked: false
                 },
                 currentGame: {
                     ...state.currentGame,
@@ -265,13 +269,13 @@ const useGameStore = create<GameStore>((set) => ({
 
         const nextAttempts: Attempt[] = state.currentGame.attempts.map((attempt, currentIndex) =>
             currentIndex === currentAttemptIndex
-                ? { ...attempt, word: { ...attempt.word, letters: nextLetters, isWordComplete: false } }
+                ? { ...attempt, word: { ...attempt.word, letters: nextLetters, isWordChecked: false } }
                 : attempt,
         );
 
         return {
             currentLetter: { ...state.currentLetter, index: targetIndex },
-            currentWord: { ...state.currentWord, letters: nextLetters, isWordComplete: false },
+            currentWord: { ...state.currentWord, letters: nextLetters, isWordChecked: false },
             currentGame: {
                 ...state.currentGame,
                 attempts: nextAttempts,
@@ -322,7 +326,7 @@ const useGameStore = create<GameStore>((set) => ({
                 ...state.currentWord,
                 letters: nextLetters,
                 currentWord: nextWord,
-                isWordComplete: allValuesSet,
+                isWordChecked: allValuesSet,
             },
         };
     }),
