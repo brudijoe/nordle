@@ -18,6 +18,7 @@ export default function Field({ }: FieldProps) {
     const deleteWord = useGameStore((state) => state.deleteWord);
     const checkWord = useGameStore((state) => state.checkWord)
     const currentAttempt = useGameStore((state) => state.currentGame.attempts[state.currentGame.currentAttempt]);
+    const activeWord = currentAttempt.word;
 
     // TODO
     // x. ZURÜCK UND BESTÄTIGEN KNÖPFE
@@ -50,15 +51,12 @@ export default function Field({ }: FieldProps) {
                 <TouchableOpacity
                     style={styles.button}
                     onPress={() => {
-                        // TODO
+                        if (!activeWord.isWordComplete) {
+                            show('Vervollständige das Wort');
+                            return;
+                        }
+
                         checkWord(currentAttempt.word.letters);
-                        // if (state.currentWord.isWordComplete) {
-                        //     checkWord(currentAttempt.word.letters);
-                        // }
-                        // // uncomplete word
-                        // if (!state.currentWord.isWordComplete) {
-                        //     show('Vervollständige das Wort');
-                        // }
                     }}>
                     <Text style={styles.buttonText}>
                         Wort prüfen</Text>
@@ -66,10 +64,12 @@ export default function Field({ }: FieldProps) {
                 <TouchableOpacity style={styles.button}
                     onPress={() => {
                         if (state.currentLetter.index >= 1 && state.currentLetter.index <= 4) {
-                            if (!state.currentWord.isWordComplete) {
+                            if (!activeWord.isWordComplete) {
                                 moveOneLetterBack(state.currentLetter.index);
+                                return;
                             }
-                            if (state.currentWord.isWordComplete) {
+
+                            if (activeWord.isWordComplete) {
                                 show('Das Wort wurde bereits geprüft.');
                             }
                         }

@@ -34,7 +34,7 @@ type Game = {
 type GameStore = {
     // Letter
     currentLetter: Letter;
-    activateLetter: (index: number, letter: Letter, isActive: boolean) => void;
+    activateLetter: (index: number, letter: string | undefined, isActive: boolean) => void;
 
     // Word
     moveOneLetterBack: (index: number) => void;
@@ -77,7 +77,7 @@ const initialGame: Game = {
         { index: 2, isCurrentAttempt: false, word: initialWord },
         { index: 3, isCurrentAttempt: false, word: initialWord },
         { index: 4, isCurrentAttempt: false, word: initialWord },
-        { index: 3, isCurrentAttempt: false, word: initialWord },
+        { index: 5, isCurrentAttempt: false, word: initialWord },
     ],
 }
 
@@ -108,7 +108,7 @@ const useGameStore = create<GameStore>((set) => ({
 
         // Beim einem Match wird die Buchstabenanzahl reduziert um 1
         // z. B. E E E W W {"letterStatuses": ["", "match", "", "", ""]}
-        const letterStatuses: (Letter['status'])[] = letterGuess.map((item, index) => {
+        const letterStatuses: Array<Letter['status'] | ''> = letterGuess.map((item, index) => {
             if (item.value === answerWord[index]) {
                 // Bei einem Match, wird der Zähler um 1 für z. B. "E": 2 um 1 reduziert
                 letterRecord[item.value] = letterRecord[item.value] - 1;
@@ -119,7 +119,7 @@ const useGameStore = create<GameStore>((set) => ({
 
         // Überprüft alles was kein 'match' ist und reduziert den Zähler um 1
         // z. B. E E E W W {"finalStatuses": ["matchInOtherPlace", "match", "noMatch", "matchInOtherPlace", "noMatch"]}
-        const finalStatuses = letterStatuses.map((status, index) => {
+        const finalStatuses: Letter['status'][] = letterStatuses.map((status, index) => {
             if (status === 'match') return 'match';
 
             // Einzelbuchstaben z. B. E, E, E, W, W
@@ -131,39 +131,68 @@ const useGameStore = create<GameStore>((set) => ({
             return 'noMatch';
         });
 
-        const nextLetters = letterGuess.map((item, index) => ({
+        const nextLetters: Letter[] = letterGuess.map((item, index) => ({
             ...item,
             status: finalStatuses[index],
             isActive: false,
         }));
 
-        // HIER NOCH DEN ATTEMPT UPDATEN
-        console.log("nextLetters: ", nextLetters);
+        const currentAttemptIndex = state.currentGame.currentAttempt;
+        const nextAttempts: Attempt[] = state.currentGame.attempts.map((attempt, index) => {
+            if (index !== currentAttemptIndex) {
+                return attempt;
+            }
 
+            const nextWord: Word = {
+                ...attempt.word,
+                letters: nextLetters,
+                status: 'completed',
+                isWordComplete: true,
+            };
+
+            return {
+                ...attempt,
+                isCurrentAttempt: false,
+                word: nextWord,
+            };
+        });
+
+        const nextCurrentWord: Word = {
+            ...state.currentWord,
+            letters: nextLetters,
+            status: 'completed',
+            isWordComplete: true,
+        };
 
         return {
-            // Hier updaten
-            currentWord: {
-                ...state.currentWord,
-                letters: nextLetters,
+            currentWord: nextCurrentWord,
+            currentGame: {
+                ...state.currentGame,
+                attempts: nextAttempts,
             },
         };
     }),
 
     currentLetter: initialLetter,
     activateLetter: (index, letter, isActive) => set((state) => {
-        const nextLetters = state.currentWord.letters.map((item, currentIndex) =>
-            currentIndex === index ? { ...item, value: state.currentWord.letters[index].value, isActive }
+        const activeAttempt = state.currentGame.attempts[state.currentGame.currentAttempt];
+        const nextLetters = activeAttempt.word.letters.map((item, currentIndex) =>
+            currentIndex === index ? { ...item, value: activeAttempt.word.letters[index].value, isActive }
                 : { ...item, isActive: false },
         );
 
         const allValuesSet = nextLetters.every(item => item.value !== "");
+        const nextAttempts = state.currentGame.attempts.map((attempt, currentIndex) =>
+            currentIndex === state.currentGame.currentAttempt
+                ? { ...attempt, word: { ...attempt.word, letters: nextLetters, isWordComplete: allValuesSet } }
+                : attempt,
+        );
 
         return {
             currentLetter: {
                 ...state.currentLetter,
                 index,
-                letter,
+                value: letter ?? '',
                 isActive
             },
             currentWord: {
@@ -171,13 +200,17 @@ const useGameStore = create<GameStore>((set) => ({
                 letters: nextLetters,
                 isWordComplete: allValuesSet,
             },
+            currentGame: {
+                ...state.currentGame,
+                attempts: nextAttempts,
+            },
         };
 
     }),
 
     moveOneLetterBack: (index) => set((state) => {
-        // Aktuelle Letters
-        const letters = state.currentWord.letters;
+        const currentAttemptIndex = state.currentGame.currentAttempt;
+        const letters = state.currentGame.attempts[currentAttemptIndex].word.letters;
         // Boolean der prüft, ob im letzten Wort, der Wert nicht mehr leer ist
         // 1) index === letters.length - 1
         // 1) Erklärung: Vergleicht index und letters Länge (ist immer 5 - 1 = 4)
@@ -188,13 +221,19 @@ const useGameStore = create<GameStore>((set) => ({
         // Fall 1: Cursor steht auf der letzten, bereits befüllten Box
         // → diese Box selbst leeren und aktiv lassen
         if (isLastFilledBox) {
-            const nextLetters = letters.map((item, itemIndex) => {
+            const nextLetters: Letter[] = letters.map((item, itemIndex) => {
                 if (itemIndex === index) {
                     return { ...item, value: "", isActive: true }
                 }
 
                 return item;
             });
+
+            const nextAttempts: Attempt[] = state.currentGame.attempts.map((attempt, currentIndex) =>
+                currentIndex === currentAttemptIndex
+                    ? { ...attempt, word: { ...attempt.word, letters: nextLetters, isWordComplete: false } }
+                    : attempt,
+            );
 
             return {
                 currentLetter: {
@@ -206,6 +245,10 @@ const useGameStore = create<GameStore>((set) => ({
                     letters: nextLetters,
                     isWordComplete: false
                 },
+                currentGame: {
+                    ...state.currentGame,
+                    attempts: nextAttempts,
+                },
             };
         }
 
@@ -215,7 +258,7 @@ const useGameStore = create<GameStore>((set) => ({
         // TODO: Das prüfe ich beim Code, fragen wohin man das besser auslagert
         if (targetIndex < 0) return state;
 
-        const nextLetters = letters.map((item, itemIndex) => {
+        const nextLetters: Letter[] = letters.map((item, itemIndex) => {
             // Vorheriger Buchstaben löschen und Wert auf "" setzen und aktivieren
             if (itemIndex === targetIndex) {
                 return { ...item, value: "", isActive: true };
@@ -229,9 +272,19 @@ const useGameStore = create<GameStore>((set) => ({
             return item;
         });
 
+        const nextAttempts: Attempt[] = state.currentGame.attempts.map((attempt, currentIndex) =>
+            currentIndex === currentAttemptIndex
+                ? { ...attempt, word: { ...attempt.word, letters: nextLetters, isWordComplete: false } }
+                : attempt,
+        );
+
         return {
             currentLetter: { ...state.currentLetter, index: targetIndex },
             currentWord: { ...state.currentWord, letters: nextLetters, isWordComplete: false },
+            currentGame: {
+                ...state.currentGame,
+                attempts: nextAttempts,
+            },
         };
     }),
 
@@ -282,7 +335,29 @@ const useGameStore = create<GameStore>((set) => ({
             },
         };
     }),
-    deleteWord: () => set({ currentWord: initialWord, currentLetter: initialLetter }),
+    deleteWord: () => set((state) => {
+        const currentAttemptIndex = state.currentGame.currentAttempt;
+
+        const nextAttempts = state.currentGame.attempts.map((attempt, index) => {
+            if (index !== currentAttemptIndex) {
+                return attempt;
+            }
+
+            return {
+                ...attempt,
+                word: initialWord,
+            };
+        });
+
+        return {
+            currentWord: initialWord,
+            currentLetter: initialLetter,
+            currentGame: {
+                ...state.currentGame,
+                attempts: nextAttempts,
+            },
+        };
+    }),
 
     addLetterToCurrentAttempt: (attempt, letterIndex, letter) => set((state) => {
 
