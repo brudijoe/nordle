@@ -85,15 +85,6 @@ const useGameStore = create<GameStore>((set) => ({
 
     currentGame: initialGame,
 
-    // TODO später im Fake-Backend/Backend prüfen
-    answerWord: [
-        { index: 0, value: 'W', isActive: false },
-        { index: 1, value: 'E', isActive: false },
-        { index: 2, value: 'R', isActive: false },
-        { index: 3, value: 'T', isActive: false },
-        { index: 4, value: 'E', isActive: false },
-    ],
-
     checkWord: (guessedWord) => set((state) => {
         const answerWord = ['W', 'E', 'R', 'T', 'E']; // kommt später vom Backend
 

@@ -5,10 +5,8 @@ import useGameStore, { Attempt as AttemptProps } from "@/store/useGameStore";
 export default function Word({ index, isCurrentAttempt, word }: AttemptProps) {
     return (
         <View style={styles.container}>
-            {/* Das gehört am Anfang zum ersten Versuch */}
-            {/* Attempt müssten die letters enthalten, das hier ist sonst unlogisch */}
             {word.letters.map((letter, indexLetter) => {
-                if (isCurrentAttempt === true) {
+                if (isCurrentAttempt === true || word.isWordComplete) {
                     return <Letter
                         key={indexLetter}
                         index={letter.index}

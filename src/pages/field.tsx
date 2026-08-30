@@ -20,6 +20,9 @@ export default function Field({ }: FieldProps) {
     const currentAttempt = useGameStore((state) => state.currentGame.attempts[state.currentGame.currentAttempt]);
     const activeWord = currentAttempt.word;
 
+    console.log(activeWord.isWordComplete);
+
+
     // TODO
     // x. ZURÜCK UND BESTÄTIGEN KNÖPFE
     // 1. Wort eingeben z. B: R A S E N
@@ -30,10 +33,12 @@ export default function Field({ }: FieldProps) {
 
     const game = useGameStore((state) => state.currentGame);
 
+    console.log("currentGame: ", game.attempts[0].word.letters);
+
+
     return (
         <View style={styles.container}>
             <View style={styles.wordContainer}>
-                {/* Müsste hier die Attempts mappen? */}
                 {game.attempts.map((attempt, index) => {
                     return <Word
                         key={index}
@@ -51,10 +56,18 @@ export default function Field({ }: FieldProps) {
                 <TouchableOpacity
                     style={styles.button}
                     onPress={() => {
-                        if (!activeWord.isWordComplete) {
-                            show('Vervollständige das Wort');
-                            return;
-                        }
+                        // if (!activeWord.isWordComplete) {
+                        //     show('Vervollständige das Wort');
+                        //     return;
+                        // }
+
+                        // if (state.currentWord.isWordComplete) {
+                        //     checkWord(currentAttempt.word.letters);
+                        // }
+                        // // uncomplete word
+                        // if (!state.currentWord.isWordComplete) {
+                        //     show('Vervollständige das Wort');
+                        // }
 
                         checkWord(currentAttempt.word.letters);
                     }}>
@@ -77,9 +90,11 @@ export default function Field({ }: FieldProps) {
                     <Text style={styles.buttonText}>Zurück</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.button}>
-                    <Text style={styles.buttonText}
+                    <Text
+                        style={styles.buttonText}
                         onPress={deleteWord}>
-                        Wort löschen</Text>
+                        Wort löschen
+                    </Text>
                 </TouchableOpacity>
             </View>
         </View>
