@@ -10,7 +10,7 @@ export type Letter = {
     status: LetterStatus;
 };
 
-type WordStatus = 'unfinished' | 'completed';
+type WordStatus = 'unfinished' | 'filled' | 'completed';
 
 type Word = {
     letters: Letter[];
@@ -39,7 +39,6 @@ type GameStore = {
     // Word
     moveOneLetterBack: (index: number) => void;
     currentWord: Word;
-    addLetterToWord: (index: number, letter: string | undefined) => void;
     checkWord: (guessedWord: Letter[]) => void;
     deleteWord: () => void;
 
@@ -51,6 +50,19 @@ type GameStore = {
 const initialWord: Word = {
     letters: [
         { index: 0, value: '', isActive: true, status: 'unchecked' },
+        { index: 1, value: '', isActive: false, status: 'unchecked' },
+        { index: 2, value: '', isActive: false, status: 'unchecked' },
+        { index: 3, value: '', isActive: false, status: 'unchecked' },
+        { index: 4, value: '', isActive: false, status: 'unchecked' },
+    ],
+    currentWord: '',
+    status: 'unfinished',
+    isWordChecked: false,
+};
+
+const initialInactiveWord: Word = {
+    letters: [
+        { index: 0, value: '', isActive: false, status: 'unchecked' },
         { index: 1, value: '', isActive: false, status: 'unchecked' },
         { index: 2, value: '', isActive: false, status: 'unchecked' },
         { index: 3, value: '', isActive: false, status: 'unchecked' },
@@ -73,11 +85,11 @@ const initialGame: Game = {
     isGameFinished: false,
     attempts: [
         { index: 0, isCurrentAttempt: true, word: initialWord },
-        { index: 1, isCurrentAttempt: false, word: initialWord },
-        { index: 2, isCurrentAttempt: false, word: initialWord },
-        { index: 3, isCurrentAttempt: false, word: initialWord },
-        { index: 4, isCurrentAttempt: false, word: initialWord },
-        { index: 5, isCurrentAttempt: false, word: initialWord },
+        { index: 1, isCurrentAttempt: false, word: initialInactiveWord },
+        { index: 2, isCurrentAttempt: false, word: initialInactiveWord },
+        { index: 3, isCurrentAttempt: false, word: initialInactiveWord },
+        { index: 4, isCurrentAttempt: false, word: initialInactiveWord },
+        { index: 5, isCurrentAttempt: false, word: initialInactiveWord },
     ],
 }
 
@@ -128,41 +140,67 @@ const useGameStore = create<GameStore>((set) => ({
             isActive: false,
         }));
 
+        // z. B. E E E W W {"currentAttemptIndex": 0}
         const currentAttemptIndex = state.currentGame.currentAttempt;
+        const isLastAttempt = currentAttemptIndex === state.currentGame.attempts.length - 1;
+        const nextAttemptIndex = isLastAttempt ? currentAttemptIndex : currentAttemptIndex + 1;
 
         const nextAttempts: Attempt[] = state.currentGame.attempts.map((attempt, index) => {
-            if (index !== currentAttemptIndex) {
-                return attempt;
+            // 1. Durchlauf = 0 !== 0
+            // 2. Durchlauf = 1 !== 0
+            // ...
+            if (index === currentAttemptIndex) {
+                const nextWord: Word = {
+                    ...attempt.word,
+                    letters: nextLetters,
+                    status: 'completed',
+                    // Wann wann wird das hier gesetzt?
+                    isWordChecked: true,
+                };
+
+                return {
+                    ...attempt,
+                    isCurrentAttempt: false,
+                    word: nextWord,
+                };
             }
 
-            const nextWord: Word = {
-                ...attempt.word,
-                letters: nextLetters,
-                status: 'completed',
-                isWordChecked: true,
-            };
+            // Nächsten Versuch aktivieren
+            if (index === nextAttemptIndex && !isLastAttempt) {
+                const activatedLetters = attempt.word.letters.map((letter, letterIndex) => ({
+                    ...letter,
+                    isActive: letterIndex === 0,
+                }));
 
-            return {
-                ...attempt,
-                isCurrentAttempt: false,
-                word: nextWord,
-            };
+                return {
+                    ...attempt,
+                    isCurrentAttempt: true,
+                    word: {
+                        ...attempt.word,
+                        letters: activatedLetters,
+                    },
+                };
+            }
+
+            return attempt;
         });
 
-        console.log("nextAttempts: ", nextAttempts[0].word.isWordChecked);
-
-
-        const nextCurrentWord: Word = {
+        const nextCurrentWord: Word = isLastAttempt ? {
             ...state.currentWord,
             letters: nextLetters,
             status: 'completed',
             isWordChecked: true,
-        };
+        } : nextAttempts[nextAttemptIndex].word;
 
         return {
             currentWord: nextCurrentWord,
+            currentLetter: isLastAttempt
+                ? state.currentLetter
+                : { ...state.currentLetter, index: 0, value: '', isActive: true },
             currentGame: {
                 ...state.currentGame,
+                currentAttempt: nextAttemptIndex,
+                isGameFinished: isLastAttempt || state.currentGame.isGameFinished,
                 attempts: nextAttempts,
             },
         };
@@ -285,53 +323,17 @@ const useGameStore = create<GameStore>((set) => ({
 
     currentWord: initialWord,
 
-    addLetterToWord: (index, letter) => set((state) => {
-
-        // TODO const for wordLength index < 4
-        const nextActiveIndex = index < 4
-            ? index + 1
-            : index;
-
-        const nextLetters = state.currentWord.letters.map((item, currentIndex) => {
-            // Last Letter in Word
-            if (currentIndex === 4 && index === 4) {
-                return { ...item, value: letter ?? '', isActive: false };
-            }
-
-            // Last Typed Letter
-            if (currentIndex === index) {
-                return { ...item, value: letter ?? '', isActive: false };
-            }
-
-            return {
-                ...item,
-                isActive: currentIndex === nextActiveIndex,
-            };
-        });
-
-        const nextWord = nextLetters.map((item) => item.value).join('');
-
-        const allValuesSet = nextLetters.every(item => item.value !== "");
-
-
-        return {
-            currentLetter: {
-                ...state.currentLetter,
-                // TODO wordlength checken
-                index: index == 4 ? index : index + 1,
-                letter,
-                isActive: true
-            },
-            currentWord: {
-                ...state.currentWord,
-                letters: nextLetters,
-                currentWord: nextWord,
-                isWordChecked: allValuesSet,
-            },
-        };
-    }),
     deleteWord: () => set((state) => {
         const currentAttemptIndex = state.currentGame.currentAttempt;
+        const isLastAttempt = currentAttemptIndex === state.currentGame.attempts.length - 1;
+
+        if (isLastAttempt) {
+            return {
+                currentGame: {
+                    ...state.currentGame,
+                },
+            };
+        }
 
         const nextAttempts = state.currentGame.attempts.map((attempt, index) => {
             if (index !== currentAttemptIndex) {
@@ -355,6 +357,18 @@ const useGameStore = create<GameStore>((set) => ({
     }),
 
     addLetterToCurrentAttempt: (attempt, letterIndex, letter) => set((state) => {
+
+        // Wenn kein Letter active ist, dann füge keinen Buchstaben hinzu
+        if (!attempt.word.letters[letterIndex].isActive) {
+            return {
+                currentLetter: {
+                    ...state.currentLetter,
+                },
+                currentGame: {
+                    ...state.currentGame,
+                },
+            };
+        }
 
         // TODO const for wordLength index < 4
         const nextActiveIndex = letterIndex < 4
@@ -384,14 +398,18 @@ const useGameStore = create<GameStore>((set) => ({
                 };
             });
 
-            console.log(nextLetters);
-
+            // Check if the word is filled and check every letter
+            const isWordFilled = nextLetters.every((letter) => {
+                return letter.value !== "";
+            });
 
             return {
                 ...currentAttempt,
                 word: {
                     ...currentAttempt.word,
                     letters: nextLetters,
+                    // TODO: Fix typing issue with state
+                    status: isWordFilled === true ? 'filled' : 'unfinished'
                 },
             };
         });

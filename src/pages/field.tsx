@@ -20,14 +20,6 @@ export default function Field({ }: FieldProps) {
     const currentAttempt = useGameStore((state) => state.currentGame.attempts[state.currentGame.currentAttempt]);
     const activeWord = currentAttempt.word;
 
-    console.log(activeWord.isWordChecked);
-
-
-    // TODO
-    // x. ZURÜCK UND BESTÄTIGEN KNÖPFE
-    // 1. Wort eingeben z. B: R A S E N
-    // x. Wort prüfen
-
     //Snackbar
     const show = useSnackbarStore((state) => state.show);
 
@@ -53,36 +45,22 @@ export default function Field({ }: FieldProps) {
                 <TouchableOpacity
                     style={styles.button}
                     onPress={() => {
-                        // if (!activeWord.isWordChecked) {
-                        //     show('Vervollständige das Wort');
-                        //     return;
-                        // }
+                        // TODO Check if there benefits to make it global
+                        if (activeWord.status === 'unfinished') {
+                            show('Vervollständige das Wort');
+                            return;
+                        }
 
-                        // if (state.currentWord.isWordChecked) {
-                        //     checkWord(currentAttempt.word.letters);
-                        // }
-                        // // uncomplete word
-                        // if (!state.currentWord.isWordChecked) {
-                        //     show('Vervollständige das Wort');
-                        // }
-
-                        checkWord(currentAttempt.word.letters);
+                        if (activeWord.status === 'filled') {
+                            checkWord(currentAttempt.word.letters);
+                        }
                     }}>
                     <Text style={styles.buttonText}>
                         Wort prüfen</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.button}
                     onPress={() => {
-                        if (state.currentLetter.index >= 1 && state.currentLetter.index <= 4) {
-                            if (!activeWord.isWordChecked) {
-                                moveOneLetterBack(state.currentLetter.index);
-                                return;
-                            }
-
-                            if (activeWord.isWordChecked) {
-                                show('Das Wort wurde bereits geprüft.');
-                            }
-                        }
+                        moveOneLetterBack(state.currentLetter.index);
                     }}>
                     <Text style={styles.buttonText}>Zurück</Text>
                 </TouchableOpacity>
