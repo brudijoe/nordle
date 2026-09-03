@@ -25,10 +25,13 @@ export type Attempt = {
     word: Word,
 }
 
+type GameStatus = 'open' | 'lose' | 'win';
+
 type Game = {
     currentAttempt: number,
     isGameFinished: boolean,
     attempts: Attempt[],
+    status: GameStatus;
 };
 
 type GameStore = {
@@ -91,6 +94,7 @@ const initialGame: Game = {
         { index: 4, isCurrentAttempt: false, word: initialInactiveWord },
         { index: 5, isCurrentAttempt: false, word: initialInactiveWord },
     ],
+    status: 'open',
 }
 
 const useGameStore = create<GameStore>((set) => ({
@@ -192,6 +196,11 @@ const useGameStore = create<GameStore>((set) => ({
             isWordChecked: true,
         } : nextAttempts[nextAttemptIndex].word;
 
+        // Game status for win
+        const gameStatus = nextLetters.every((letter) => {
+            return letter.status === 'match';
+        });
+
         return {
             currentWord: nextCurrentWord,
             currentLetter: isLastAttempt
@@ -202,6 +211,7 @@ const useGameStore = create<GameStore>((set) => ({
                 currentAttempt: nextAttemptIndex,
                 isGameFinished: isLastAttempt || state.currentGame.isGameFinished,
                 attempts: nextAttempts,
+                status: gameStatus === true ? 'win' : gameStatus === false && isLastAttempt ? 'lose' : 'open'
             },
         };
     }),

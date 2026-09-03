@@ -4,17 +4,9 @@ import useGameStore, { Attempt as AttemptProps } from "@/store/useGameStore";
 
 export default function Word({ index, isCurrentAttempt, word }: AttemptProps) {
     return (
-        <View style={styles.container}>
-            {word.letters.map((letter, indexLetter) => {
-                return <Letter
-                    key={indexLetter}
-                    index={letter.index}
-                    value={letter.value}
-                    isActive={letter.isActive}
-                    status={letter.status}
-                />
-                // TODO isCurrentAttempt === true ist nicht richtig
-                if (isCurrentAttempt === true || word.isWordChecked) {
+        <>
+            <View style={styles.container}>
+                {word.letters.map((letter, indexLetter) => {
                     return <Letter
                         key={indexLetter}
                         index={letter.index}
@@ -22,15 +14,9 @@ export default function Word({ index, isCurrentAttempt, word }: AttemptProps) {
                         isActive={letter.isActive}
                         status={letter.status}
                     />
-                } else {
-                    return (
-                        <View key={indexLetter}>
-                            <View style={styles.emptyLetter} />
-                        </View>
-                    );
-                }
-            })}
-        </View>
+                })}
+            </View>
+        </>
     );
 }
 
