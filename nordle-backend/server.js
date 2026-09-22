@@ -1,3 +1,6 @@
+// server.js
+'use strict'
+
 // ESM
 import Fastify from 'fastify'
 import fastifyEnv from '@fastify/env'
@@ -21,7 +24,11 @@ const schema = {
  */
 const start = async () => {
     try {
-        await fastify.register(fastifyEnv, { schema: schema, dotenv: true })
+        // Order of declaration matters when using register
+        await fastify.register(fastifyEnv, {
+            schema: schema,
+            dotenv: true // will read .env in root folder
+        })
         await fastify.register(dbConnector, { connectionString: fastify.config.DATABASE_URL })
         await fastify.register(routes)
         await fastify.listen({ port: 3000 })
