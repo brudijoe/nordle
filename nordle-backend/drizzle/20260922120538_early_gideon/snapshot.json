@@ -1,0 +1,64 @@
+{
+  "version": "8",
+  "dialect": "postgres",
+  "id": "625142d5-1958-476c-a306-aae65809fcbe",
+  "prevIds": [
+    "00000000-0000-0000-0000-000000000000"
+  ],
+  "ddl": [
+    {
+      "isRlsEnabled": false,
+      "name": "animals",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "type": "serial",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "animals"
+    },
+    {
+      "type": "varchar(255)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "animal",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "animals"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "animals_pkey",
+      "schema": "public",
+      "table": "animals",
+      "entityType": "pks"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "animal"
+      ],
+      "nullsNotDistinct": false,
+      "name": "animals_animal_key",
+      "schema": "public",
+      "table": "animals",
+      "entityType": "uniques"
+    }
+  ],
+  "renames": []
+}
