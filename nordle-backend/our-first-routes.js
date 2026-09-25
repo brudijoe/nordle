@@ -1,17 +1,69 @@
 import { eq } from 'drizzle-orm'
 import { animals } from './src/db/schema.ts'
 
-// Schema-Validierung für den POST-Body
-const animalBodyJsonSchema = {
+/**
+ * Response-Schema für ein einzelnes Animal-Objekt
+ */
+const animalProperties = {
     type: 'object',
-    required: ['animal'],
+    required: ['id', 'animal'],
     properties: {
+        id: { type: 'integer' },
         animal: { type: 'string' },
-    },
+    }
 }
 
-const postAnimalSchema = {
-    body: animalBodyJsonSchema,
+/**
+ * GET /animals — Liste von Animals
+ * @type {import('fastify').RouteShorthandOptions}
+ */
+const getAllOpts = {
+    schema: {
+        response: {
+            200: {
+                type: 'array',
+                items: animalProperties
+            }
+        }
+    }
+}
+
+/**
+ * GET /animals/:animal — ein einzelnes Animal
+ * @type {import('fastify').RouteShorthandOptions}
+ */
+const getByIdOpts = {
+    schema: {
+        params: {
+            type: 'object',
+            required: ['animal'],
+            properties: {
+                animal: { type: 'string' },
+            },
+        },
+        response: {
+            200: animalProperties
+        }
+    }
+}
+
+/**
+ * Schema für POST /animals (hat einen Body)
+ * @type {import('fastify').RouteShorthandOptions}
+ */
+const postOpts = {
+    schema: {
+        body: {
+            type: 'object',
+            required: ['animal'],
+            properties: {
+                animal: { type: 'string' },
+            },
+        },
+        response: {
+            201: animalProperties
+        }
+    }
 }
 
 /**
@@ -20,13 +72,13 @@ const postAnimalSchema = {
  * @param {Object} options plugin options, refer to https://fastify.dev/docs/latest/Reference/Plugins/#plugin-options
  */
 async function routes(fastify, options) {
-    fastify.get('/animals', async (request, reply) => {
+    fastify.get('/animals', getAllOpts, async (request, reply) => {
         const rows = await fastify.db.select().from(animals)
         if (rows.length === 0) throw new Error('No documents found')
         return rows
     })
 
-    fastify.get('/animals/:animal', async (request, reply) => {
+    fastify.get('/animals/:animal', getByIdOpts, async (request, reply) => {
         const [row] = await fastify.db
             .select()
             .from(animals)
@@ -36,7 +88,9 @@ async function routes(fastify, options) {
         return row
     })
 
-    fastify.post('/animals', { schema: postAnimalSchema }, async (request, reply) => {
+    // Invoke post method from powershell
+    // Invoke-RestMethod -Uri http://localhost:3000/animals -Method Post -ContentType "application/json" -Body '{"animal": "Hamster"}'
+    fastify.post('/animals', postOpts, async (request, reply) => {
         const [row] = await fastify.db
             .insert(animals)
             .values({ animal: request.body.animal })
