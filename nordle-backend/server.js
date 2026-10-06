@@ -5,7 +5,8 @@
 import Fastify from 'fastify'
 import fastifyEnv from '@fastify/env'
 import routes from './our-first-routes.js'
-import dbConnector from './our-db-connector.js'
+import dbConnector from './src/plugins/db.ts'
+import usersRoutes from './src/modules/users/users.routes.ts'
 
 const fastify = Fastify({
     logger: true
@@ -31,6 +32,7 @@ const start = async () => {
         })
         await fastify.register(dbConnector, { connectionString: fastify.config.DATABASE_URL })
         await fastify.register(routes)
+        await fastify.register(usersRoutes, { prefix: '/users' })
         await fastify.listen({ port: 3000 })
     } catch (err) {
         fastify.log.error(err)
