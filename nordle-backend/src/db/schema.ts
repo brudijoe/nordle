@@ -1,6 +1,4 @@
-import { integer, pgTable, varchar } from 'drizzle-orm/pg-core'
-
-export const animals = pgTable('animals', {
-    id: integer().primaryKey().generatedAlwaysAsIdentity(),
-    animal: varchar({ length: 255 }).notNull().unique(),
-})
+// src/db/schema.ts
+// Sammeldatei für drizzle.config.ts
+export * from './schema/animals.ts'
+export * from './schema/users.ts'
